@@ -14,6 +14,23 @@ function f_prime_ana(x)
     return y
 end
 
+function bracket_and_bisect(a,b,f,maxstep)
+    steps=1:1:maxstep
+    estimates=zeros(length(steps))
+    for i in steps
+        x=(a+b)/2
+        if f(a)*f(x)>0 
+            a=x
+            b=b
+        else
+            a=a
+            b=x
+        end
+        estimates[i]=x
+    end
+    return steps,estimates
+end
+
 function golden_section(a,c,f,maxstep)
     steps=1:1:maxstep
     estimates=zeros(length(steps))
