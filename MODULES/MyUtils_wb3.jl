@@ -31,6 +31,17 @@ function bracket_and_bisect(a,b,f,maxstep)
     return steps,estimates
 end
 
+function newton_raphson(x,f,f_prime,maxstep)
+    steps=1:1:maxstep
+    estimates=zeros(length(steps))
+    for i in steps
+        d=-f(x)/f_prime(x)
+        x=x+d
+        estimates[i]=x
+    end
+    return steps,estimates
+end
+
 function golden_section(a,c,f,maxstep)
     steps=1:1:maxstep
     estimates=zeros(length(steps))
