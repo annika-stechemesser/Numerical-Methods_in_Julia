@@ -1,6 +1,11 @@
 ## Functions Workbook 2 Question 1
  
-##This function takes the desired number of KV-Pairs as an input and outputs the respective number of key value pairs. For the generated key value pairs, the keys are integers in ascending order and the values are random numbers. 
+
+# Function 1.1
+
+##This function generates key value pairs. The keys are integers from 1 to n in ascending order and the values are random numbers. 
+#Input: desired number of KVPairs
+#Output: array of KVPairs
 function create_KVPairs(n)
     seed = 1235 
     rng = MersenneTwister(seed)
@@ -12,7 +17,11 @@ function create_KVPairs(n)
     return values
 end
 
+#FUNCTION 1.2
+
 ## This function is the answer to Q1 Part 1 and therefore also included in the notebook.
+#Input: list
+#Output: print of the key values of the KV Pairs
 function list_traverse(LList::Nullable{LList})  #the input needs to be of the type "Nullable{LList}"
     L=LList
     k=get(L).data  #k=key value pair of the list
@@ -24,47 +33,59 @@ function list_traverse(LList::Nullable{LList})  #the input needs to be of the ty
     end    
 end 
 
+#FUNCTION 1.3
+
 ## This function is the answer to Q1 Part 2 and therefore also included in the notebook.
-function list_search(LList::Nullable{LList}, a::Int64) #the input needs to be of the type "Nullable{LList}", "Int64"
+#Input: list, key we want to search for
+#Output: KVPair that has the key we searched for
+function list_search(LList::Nullable{LList}, a::Int64) 	#the input needs to be of the type "Nullable{LList}", "Int64"
     L=LList
-    k=get(L).data #k=key value pair of the list
-    k1=k.key      # k1 = key of the list 
-    if (k1 == a)  # if the key is the one we're looking for, return the key value pair k
+    k=get(L).data 					#k=key value pair of the list
+    k1=k.key      					# k1 = key of the list 
+    if (k1 == a)  					# if the key is the one we're looking for, return the key value 							pair k
         return(k)
     else
-        L=get(L).next # else update the list and repeat the process (recursive function)
+        L=get(L).next 					# else update the list and repeat the process (recursive function)
         list_search(L,a)    
     end
 end
 
-
+#FUNCTION 1.4
 
 ## This function is checking if the previously defined function "list_search" is working correctly. 
-function working_search(n::Int64) # takes a desired list size as input value
-    values=create_KVPairs(n)  # uses the function "create_KVPairs" to build an array of KV pairs
-    L=buildLList(values); # uses the function "buildLList" to turn them into a list
-    working=true # set the boolian variable "working" to "true"
-    for i=1:length(values)    #search for every possible key
+#Input: desired list size
+#Output: statement about the function "list_search"
+function working_search(n::Int64) 		# takes a desired list size as input value
+    values=create_KVPairs(n)  			# uses the function "create_KVPairs" to build an array of KV pairs
+    L=buildLList(values); 			# uses the function "buildLList" to turn them into a list
+    working=true 				# set the boolian variable "working" to "true"
+    for i=1:length(values)    			#search for every possible key
         if (list_search(L,i).key != values[i].key) 
-#if "list_search" finds a key (of a KVPair) that doesn't match the original one -> working = false 
+						#if "list_search" finds a key (of a KVPair) that doesn't match the original 							one -> working = false 
             println("The function does not work correctly.")
             working=false
-# if "list_search" finds a value (of a KVPair) that doesn't match the original one -> working = false
+						# if "list_search" finds a value (of a KVPair) that doesn't match the 							original one -> working = false
         elseif (list_search(L,i).value != values[i].value)
             println("The function does not work correctly.")
             working=false
         end
     end
-# if "list_search" works correctly this function will display it in the workbook.
+						# if "list_search" works correctly this function will display it in the 						workbook.
     if working==true
         println("The function works correctly.")    
     end
 end
 
-## This function takes the maximal list length as input argument. It builds a list for every list length and searches for every key value. The execution time is then the mean of the search times.
-function Cost_List_search(n)
-Time=zeros(n)
-        for i=1:n
+
+#FUNCTION 1.5
+
+## This function evaluates the growth of the computational cost for an increasing list size of the function "list_search".
+#Input: linspace (has maximal list size, stepwidt)
+#Output: mean of the running times (search for every possible key) for each list size
+function Cost_List_search(x)
+Time=zeros(length(x))
+	counter=1
+        for i in x
             Sub_time=zeros(i)
             values=create_KVPairs(i)
             L=buildLList(values)
@@ -72,7 +93,8 @@ Time=zeros(n)
             for j=1:i
             Sub_time[j]=(@timed list_search(L,j))[2]
             end
-            Time[i]=mean(Sub_time)
+            Time[counter]=mean(Sub_time)
+	    counter=counter+1
         end
     return Time
 end
