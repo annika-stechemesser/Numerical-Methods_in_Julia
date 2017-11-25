@@ -107,9 +107,11 @@ function intervalmembership(list::Nullable{LList},x::Float64) #The input has to 
 end
 
 #This function evaluates the computational effort of the function "intervalmembership" with growing number of intervals. Input: maximal number of intervals, number of iterations per number of intervals
-function Cost_lin_interval(n::Int64,m::Int64)
-Time=zeros(n)
-for i=1:n
+function Cost_lin_interval(x,m::Int64)
+Time=zeros(length(x))
+Std=zeros(length(x))
+counter=1
+for i in x
     Sub_time=zeros(m)
      for j=1:m
         values=create_KVPairs_partial_sums(i)
@@ -117,9 +119,11 @@ for i=1:n
         x=rand()*values[i].value
         Sub_time[j]=(@timed intervalmembership(L,x))[2];
       end
-    Time[i]=mean(Sub_time)
+    Time[counter]=mean(Sub_time)
+    Std[counter]=std(Sub_time)
+    counter=counter+1
 end
-    return Time
+    return Time,Std
 end
 
 
