@@ -258,54 +258,56 @@ end
 end
 ## Functions Question 3
 
+#FUNCTION 3.1
 
 # This is the adapted code from Question 3.1
-function particle_linear(N,D,T)
+# Input: number of particles
+# Output: X, P=estimated density of the particles
+function particle_linear(N)
     L=10
     Nx = 201
-    X = dx.*(-(Nx-1)/2:(Nx-1)/2)
     dx = 2.0*L/(Nx-1)
+    X = dx.*(-(Nx-1)/2:(Nx-1)/2)
     Y =zeros(Int64,N)
-    D = 1.0
+    D = 1.0 				#fix the mean to be 1.0
     t=0.0
+    T=1.0				#fix the time to be 1.0
 
-    #draw the rates from an exponential distribution
-    Rates=zeros(2*N)
-    Rates[1:N]=randexp(N)*D
-    Rates[N+1:2N]=Rates[1:N]
-    Rates=Rates.*(1/2(dx*dx))
-    #calculate the total rate
-    totalRate=sum(Rates)
-    #scale the time 
-    dt = 1.0/totalRate
+    Rates=zeros(2*N)			#initialize an array of length 2N for the rates
+    Rates[1:N]=randexp(N)*D		#draw the first N rates from the exponential distribution with mean D
+    Rates[N+1:2N]=Rates[1:N]		#make sure that the forward- and backwardsrates are the same (Rates[i]=Rates[N+i])
+    Rates=Rates.*(1/2(dx*dx))           #scale according to the formula from before (r_i=(D/2)*(1/dx^2))
+    
+    totalRate=sum(Rates)		#calculate the total rate
+    
+    dt = 1.0/totalRate			#scale the time
 
-    #build the list (needed to solve the interval membership problem)
-    KV_Rates=Array{KVPair}(2*N)
+    KV_Rates=Array{KVPair}(2*N)    	#initialize the array of KVPairs
 
-    for i=1:2*N
+    for i=1:2*N				#build the list (needed to solve the interval membership problem)
         x=sum(Rates[1:i])
         KV_Rates[i]=KVPair(i,x)
     end
     Rates_list=buildLList(KV_Rates)
 
     #This is the main loop
+
     while t < T
-       # Pick an event from the right range
-        k = rand()*totalRate
-        #solve the intervalmembership problem
-        interval=intervalmembership(Rates_list,k)
-        #find the corresponding interval key
-          interval=interval.key
-        #decide which way to hop and update the particle ID 
-        if interval<=N
+  
+        k = rand(1:totalRate)				# Pick an event 
+        interval=intervalmembership(Rates_list,k)	#solve the intervalmembership problem
+       
+          interval=interval.key				#find the corresponding interval key
+     
+        if interval<=N					#decide which way to hop and update the particle ID 
             hop = 1
             particleId = interval
         else
             hop = -1
             particleId=interval-N
         end
-        Y[particleId]+=hop
-        t+=dt
+        Y[particleId]+=hop				#update Y
+        t+=dt						#update t
     end
 
     #Calculate the estimated density of particles
