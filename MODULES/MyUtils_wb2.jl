@@ -106,6 +106,25 @@ function intervalmembership(list::Nullable{LList},x::Float64) #The input has to 
     end
 end
 
+#This function evaluates the computational effort of the function "intervalmembership" with growing number of intervals. Input: maximal number of intervals, number of iterations per number of intervals
+function Cost_lin_interval(n::Int64,m::Int64)
+Time=zeros(n)
+for i=1:n
+    Sub_time=zeros(m)
+     for j=1:m
+        values=create_KVPairs_partial_sums(i)
+        L=buildLList( values)
+        x=rand()*values[i].value
+        Sub_time[j]=(@timed intervalmembership(L,x))[2];
+      end
+    Time[i]=mean(Sub_time)
+end
+    return Time
+end
+
+
+
+
 ## This function is the answer to Q2 Part 3 and therefore is also influcded in the notebook.
 function intervalmembership_tree(FT::Nullable{FTree},x::Float64) #the input needs to be of the type "Nullable{LList}", "Int64" 
     l=get(FT).left                            #let l be the left subtree
@@ -123,6 +142,8 @@ end
 
 # this function takes the desired number of KVPairs as an input and outputs two arrays of KVPairs, one with random numbers as values and one with partial sums of these random values as values. 
 function create_list_sumlist(n)
+    seed = 1235 
+    rng = MersenneTwister(seed)
     X = rand(rng, n)
     values = Array{KVPair}(n)
     sum_values= Array{KVPair}(n)
@@ -134,6 +155,28 @@ function create_list_sumlist(n)
     return values,sum_values
 end
 
+#This function evaluates the computational effort of the function "intervalmembership_tree" with growing number of intervals. Input: maximal number of intervals, number of iterations per number of intervals
+function Cost_tree_interval(x,m)
+Time=zeros(length(x))
+Std=zeros(length(x))
+counter=1
+for i in x
+    Sub_time=zeros(m)
+     for j=1:m
+    values=create_KVPairs(i)
+    L=buildLList(values);
+    T = Nullable{FTree}(FTree(KVPair(0,0.0)));
+        
+    T=buildFTree(T, values);    
+    y=rand()*values[i].value
+       Sub_time[j]=(@timed intervalmembership_tree(T,y);)[2]
+      end
+    Time[counter]=mean(Sub_time)
+	Std[counter]=std(Sub_time)
+    counter=counter+1
+end
+    return Time,Std
+end
 ## Functions Question 3
 
 
