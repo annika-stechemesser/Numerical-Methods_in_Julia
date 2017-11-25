@@ -79,7 +79,11 @@ end
 
 ##Functions Workbook 2 Question 2
 
+#FUNCTION 2.1
+
 ## This function is the answer to Q2 Part 1 and therefore also included in the notebook.
+#Input: desired number of intervals
+#Output: list of KVPairs, have the interval index and the upper interval boundary
 function create_KVPairs_partial_sums(n) #desired number of intervals
     seed = 1235 
     rng = MersenneTwister(seed)
@@ -92,7 +96,13 @@ function create_KVPairs_partial_sums(n) #desired number of intervals
     return values                       #return the array of KVPairs
 end
 
+
+#FUNCTION 2.2
+
 ## This function is the answer to Q2 Part 2 and therefore is also included in the notebook.
+#Input: list, value we want to match to an interval
+#Output:KVPair, has the interval index and the upper interval boundary
+
 function intervalmembership(list::Nullable{LList},x::Float64) #The input has to be a Nullable{LList} and a Float64
     L=list
     k=get(L).data   #k is the key value pair at the top of the list (corresponding to the first interval)
@@ -106,7 +116,10 @@ function intervalmembership(list::Nullable{LList},x::Float64) #The input has to 
     end
 end
 
-#This function evaluates the computational effort of the function "intervalmembership" with growing number of intervals. Input: maximal number of intervals, number of iterations per number of intervals
+#FUNCTION 2.3
+
+#This function evaluates the computational effort of the function "intervalmembership" with growing number of intervals. #Input: maximal number of intervals, number of iterations per number of intervals
+#Output: mean Time per interval length, standard deviation per interval length
 function Cost_lin_interval(x,m::Int64)
 Time=zeros(length(x))
 Std=zeros(length(x))
@@ -126,10 +139,12 @@ end
     return Time,Std
 end
 
-
+#FUNCTION 2.4
 
 
 ## This function is the answer to Q2 Part 3 and therefore is also influcded in the notebook.
+#Input: List, value we want to match to an interval
+#Output: KVPair, has the interval index, upper interval boundary
 function intervalmembership_tree(FT::Nullable{FTree},x::Float64) #the input needs to be of the type "Nullable{LList}", "Int64" 
     l=get(FT).left                            #let l be the left subtree
     r=get(FT).right                           #let r be the right subtree
@@ -144,7 +159,11 @@ function intervalmembership_tree(FT::Nullable{FTree},x::Float64) #the input need
     end
 end
 
-# this function takes the desired number of KVPairs as an input and outputs two arrays of KVPairs, one with random numbers as values and one with partial sums of these random values as values. 
+#FUNCTION 2.5
+
+# this function generates the arrays of KVPairs that are needed two compare our two methods of solving the interval membership problem. 
+#Input: desired number of KVPairs
+#Output: Two arrays of KVPais,one with random numbers as values and one with partial sums of these random values as values. 
 function create_list_sumlist(n)
     seed = 1235 
     rng = MersenneTwister(seed)
@@ -159,7 +178,11 @@ function create_list_sumlist(n)
     return values,sum_values
 end
 
-#This function evaluates the computational effort of the function "intervalmembership_tree" with growing number of intervals. Input: maximal number of intervals, number of iterations per number of intervals
+#FUNCTION 2.6
+
+#This function evaluates the computational effort of the function "intervalmembership_tree" with growing number of intervals. 
+#Input: linspace(gives max. list size, stepwidth), number of iterations per number of intervals
+#Output: mean execution time per list length, standard deviation per list length
 function Cost_tree_interval(x,m)
 Time=zeros(length(x))
 Std=zeros(length(x))
@@ -177,6 +200,36 @@ for i in x
       end
     Time[counter]=mean(Sub_time)
 	Std[counter]=std(Sub_time)
+    counter=counter+1
+end
+    return Time,Std
+end
+
+#FUNCTION 2.7
+
+## This function is build to compare the running times of the linear search solution to the interval membership problem and the solution using the fenwick tree. 
+#Input: linspace x and the number of iterations per fixed list size m. 
+# Output: mean time difference and the standard deviation for each considered list length.
+function time_compare(x,m)
+Time=zeros(length(x))
+Std=zeros(length(x))
+counter=1
+for i in x
+    Sub_time=zeros(m)
+    Sub_time_tree=zeros(m)
+    for j=1:m
+        lists=create_list_sumlist(i)
+        L=buildLList(lists[2])
+        T = Nullable{FTree}(FTree(KVPair(0,0.0)))
+        T=buildFTree(T, lists[1])
+        C=lists[2]
+        y=rand()*C[i].value
+    
+        Sub_time[j]= (@timed intervalmembership(L,y);)[2]
+        Sub_time_tree[j]=(@timed intervalmembership_tree(T,y);)[2]
+    end
+    Time[counter]=abs(mean(Sub_time-Sub_time_tree))
+    Std[counter]=std(Sub_time-Sub_time_tree)
     counter=counter+1
 end
     return Time,Std
