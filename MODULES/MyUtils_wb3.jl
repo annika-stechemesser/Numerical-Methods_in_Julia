@@ -1,18 +1,31 @@
+#FUNCTIONS QUESTION 1
+
+#FUNCTION 1.1
+
+#this is the function defined in Question 1
 function f(x)
    y=sin(exp(x))
    return y
 end
 
+#FUNCTION 1.2
+
+#this is the derivative of function 1.1 using the formula that was found in Q1.1
 function f_prime_num(h)
     x=1
     y=(-(3/2)*f(1)+2*f(x+h)-(1/2)*f(x+2*h))/h
     return y
 end
 
+#FUNCTION 1.3
+
+# This is the analytical derivative of function 1.1
 function f_prime_ana(x)
     y=cos(exp(x))*exp(x)
     return y
 end
+
+#FUNCTION QUESTION 2 AND 3
 
 function bracket_and_bisect(a,b,f,maxstep)
     steps=1:1:maxstep
