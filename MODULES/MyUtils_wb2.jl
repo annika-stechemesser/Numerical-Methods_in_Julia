@@ -318,51 +318,61 @@ function particle_linear(N)
     return X,P
 end
 
-## adapted code tree
+#FUNCTION 3.2
+
+## This is the theoretical prediction of the particle density
+
+function normal(x, D, t)
+    return (exp(-sqrt(2/D*t)*abs(x))/sqrt(2D*t))
+end
+
+
+###
+
+
+
+#FUNCTION 3.3
+
+## This is the adapted code of Question 3.2
+#Input: Number of particles
+#Output: X, P=estimated particle density
 
 function particle_tree(N)
     L=10.0
-    N=1000
     Nx = 201
     dx = 2.0*L/(Nx-1)
     X = dx.*(-(Nx-1)/2:(Nx-1)/2)
     Y =zeros(Int64,N)
-    D = 1.0
+    D = 1.0 				#fix the mean to be 1.0
     t=0.0
+    T=1.0				#fix the time to be 1.0
 
-    #draw the rates from an exponential distribution
-    Rates=zeros(2*N)
-    Rates[1:N]=randexp(N)*D
-    Rates[N+1:2N]=Rates[1:N]
-    Rates=Rates.*(1/2(dx*dx))
-    #calculate the total rate
-    totalRate=sum(Rates)
-    #scale the time 
-    dt = 1.0/totalRate
+    Rates=zeros(2*N)			#initialize an array of length 2N for the rates
+    Rates[1:N]=randexp(N)*D		#draw the first N rates from the exponential distribution with mean D
+    Rates[N+1:2N]=Rates[1:N]		#make sure that the forward- and backwardsrates are the same (Rates[i]=Rates[N+i])
+    Rates=Rates.*(1/2(dx*dx))           #scale according to the formula from before (r_i=(D/2)*(1/dx^2))
+    
+    totalRate=sum(Rates)		#calculate the total rate
+    
+    dt = 1.0/totalRate			#scale the time
 
-    KV_Rates_tree=Array{KVPair}(2*N)
+    KV_Rates_tree=Array{KVPair}(2*N)    #initialize the array of KVPairs
 
-    for i=1:2*N
-        x=Rates[i]
+    for i=1:2*N				#build the list (needed to solve the interval membership problem) 
+        x=Rates[i]			# don't consider the cumulative sum this time!
         KV_Rates_tree[i]=KVPair(i,x)
     end
-    Tree = Nullable{FTree}(FTree(KVPair(0,0.0)))
+    Tree = Nullable{FTree}(FTree(KVPair(0,0.0)))	#build the tree
     Tree=buildFTree(Tree, KV_Rates_tree)
 
-    # particle=rand()*totalRate
-
-    # intervalmembership(Rates_list,particle)
-
-
-    T=1.0
 
     #This is the main loop
     while t < T
-    #     # Pick an event
-        k = rand()*totalRate
-        interval=intervalmembership_tree(Tree,k)
-          interval=interval.key
-        if interval<=N
+ 
+        k = rand(1:totalRate)				# Pick an event 
+        interval=intervalmembership_tree(Tree,k)	#solve the intervalmembership problem using the Fenwick tree
+          interval=interval.key				#find the corresponding interval key
+        if interval<=N					#decide which way to hop and update the particle ID 
             hop = 1
             particleId = interval
         else
@@ -382,13 +392,4 @@ function particle_tree(N)
 end
 
 
-
-## This is the theoretical prediction of the particle density
-
-function normal(x, D, t)
-    return (exp(-sqrt(2/D*t)*abs(x))/sqrt(2D*t))
-end
-
-
-###
 
